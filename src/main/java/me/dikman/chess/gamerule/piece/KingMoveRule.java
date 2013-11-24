@@ -6,12 +6,11 @@ package me.dikman.chess.gamerule.piece;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import me.dikman.chess.Chess;
 import me.dikman.chess.Square;
-import me.dikman.chess.ChessGame;
+import me.dikman.chess.game.Game;
 import me.dikman.chess.Piece;
 import me.dikman.chess.PieceColor;
 
@@ -33,47 +32,48 @@ public class KingMoveRule implements PieceRule {
         this.rules.put("Pawn", new PawnMoveRule());
     }
 
-    public boolean moveable(ChessGame game, Piece piece, Square targetSquare) {
-        Square[] movableSquares = this.getMoveableArea(piece);
-        Piece[] opponentPiecs = this.getPieces(game.getChess(), piece.getOpponentColor());
-        for (Square moveableSquare : movableSquares) {
-            if (targetSquare.equals(moveableSquare)) {
-                Piece existPiece = game.getChess().locatePiece(moveableSquare);
-                if (existPiece != null && existPiece.getColor().equals(piece.getColor())) {
-                    return false;
-                }
-                for (Piece opponent : opponentPiecs) {
-                    Piece opponentPiece = game.getChess().locatePiece(opponent.getCurrent());
-                    PieceRule moveRule = this.rules.get(opponentPiece.getName());
-                    if (moveRule.moveable(game, opponentPiece, targetSquare)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
+    public boolean moveable(Game game, Piece piece, Square targetSquare) {
+        Chess chess = game.getChess();
+        Square square = piece.getCurrent();
+        Piece targetPiece = chess.locatePiece(targetSquare);
+        if (chess.isLeapOver(piece.getCurrent(), targetSquare)) {
+            return false;
+        } else if (targetPiece != null && targetPiece.getColor().equals(piece.getColor())) {
+            return false;
+        } else if (this.kingWillBeChecked(game, piece, targetSquare)) {
+            return false;
+        } else {
+            return Math.abs(targetSquare.getFile() - square.getFile()) <= 1
+                    && Math.abs(targetSquare.getRank() - square.getRank()) <= 1
+                    && (targetSquare.getFile() != square.getFile()
+                    || targetSquare.getRank() != square.getRank());
         }
-
-        return false;
     }
 
-    private Square[] getMoveableArea(Piece king) {
-        List<Square> squares = new ArrayList();
-        squares.add(king.moveFront(1));
-        squares.add(king.moveBack(1));
-        squares.add(king.moveLeft(1));
-        squares.add(king.moveLeftBack(1));
-        squares.add(king.moveLeftFront(1));
-        squares.add(king.moveRight(1));
-        squares.add(king.moveRightBack(1));
-        squares.add(king.moveRightFront(1));
-        Iterator<Square> it = squares.iterator();
-        while (it.hasNext()) {
-            if (it.next() == null) {
-                it.remove();
+    private boolean kingWillBeChecked(Game game, Piece kingPiece, Square targetSquare) {
+        Square square = kingPiece.getCurrent();
+        Piece targetPiece = game.getChess().locatePiece(targetSquare);
+        try {
+            //detect
+            kingPiece.setCurrent(targetSquare);
+            if (targetPiece != null) {
+                targetPiece.setCurrent(null);
+            }
+            //
+            Piece[] pieces = this.getPieces(game.getChess(), kingPiece.getOpponentColor());
+            for (Piece piece : pieces) {
+                PieceRule pieceRule = this.rules.get(piece.getName());
+                if (pieceRule.moveable(game, piece, kingPiece.getCurrent())) {
+                    return true;
+                }
+            }
+            return false;
+        } finally {
+            kingPiece.setCurrent(square);
+            if (targetPiece != null) {
+                targetPiece.setCurrent(targetSquare);
             }
         }
-        return squares.toArray(new Square[squares.size()]);
     }
 
     private Piece[] getPieces(Chess chess, PieceColor color) {

@@ -2,19 +2,21 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package me.dikman.chess;
+package me.dikman.chess.game;
+
+import me.dikman.chess.PieceColor;
 
 /**
  *
  * @author HuangDiWen
  * @created Nov 20, 2013 8:28:53 PM
  */
-public class Player {
+public class GamePlayer {
 
-    private ChessGame game;
+    private Game game;
     private PieceColor color;
 
-    public Player(ChessGame game, PieceColor color) {
+    public GamePlayer(Game game, PieceColor color) {
         this.game = game;
         this.color = color;
     }

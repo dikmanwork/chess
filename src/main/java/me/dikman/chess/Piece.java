@@ -16,7 +16,7 @@ public class Piece {
     private PieceColor color;
     private Square current;
 
-    public Piece(Chess chess, String name, PieceColor color, Square current) {
+    Piece(Chess chess, String name, PieceColor color, Square current) {
         this.chess = chess;
         this.name = name;
         this.color = color;
@@ -45,6 +45,22 @@ public class Piece {
 
     public void setCurrent(Square current) {
         this.current = current;
+    }
+
+    public PieceColor getOpponentColor() {
+        return this.color.equals(PieceColor.White) ? PieceColor.Black : PieceColor.White;
+    }
+
+    public boolean sameColor(Piece targetPiece) {
+        return this.color.equals(targetPiece.getColor());
+    }
+
+    public boolean diffColor(Piece targetPiece) {
+        return !sameColor(targetPiece);
+    }
+
+    public boolean alive() {
+        return this.current != null;
     }
 
     public Square moveFront(int distance) {
@@ -134,11 +150,36 @@ public class Piece {
         }
     }
 
-    public PieceColor getOpponentColor() {
-        return this.color.equals(PieceColor.White) ? PieceColor.Black : PieceColor.White;
+    public Square move(PieceDirection direction, int diff) {
+        switch (direction) {
+            case Back:
+                return this.moveBack(diff);
+            case Front:
+                return this.moveFront(diff);
+            case Left:
+                return this.moveLeft(diff);
+            case LeftBack:
+                return this.moveLeftBack(diff);
+            case LeftFront:
+                return this.moveLeftFront(diff);
+            case Right:
+                return this.moveRight(diff);
+            case RightBack:
+                return this.moveRightBack(diff);
+            case RightFront:
+                return this.moveRightFront(diff);
+            default:
+                return null;
+        }
     }
 
-    public boolean alive() {
-        return this.current != null;
+    public enum PieceDirection {
+
+        Front, Left, Right, Back, LeftFront, RightFront, LeftBack, RightBack
+    }
+
+    @Override
+    public String toString() {
+        return this.color + "'s " + this.getName();
     }
 }

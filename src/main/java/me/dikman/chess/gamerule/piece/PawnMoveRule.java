@@ -7,12 +7,12 @@ package me.dikman.chess.gamerule.piece;
 import java.util.List;
 import me.dikman.chess.Chess;
 import me.dikman.chess.Square;
-import me.dikman.chess.ChessGame;
+import me.dikman.chess.game.Game;
 import me.dikman.chess.Piece;
 import me.dikman.chess.PieceColor;
 import static me.dikman.chess.PieceColor.Black;
 import static me.dikman.chess.PieceColor.White;
-import me.dikman.chess.Round;
+import me.dikman.chess.game.GameRound;
 
 /**
  *
@@ -21,36 +21,29 @@ import me.dikman.chess.Round;
  */
 public class PawnMoveRule implements PieceRule {
 
-    public boolean moveable(ChessGame game, Piece piece, Square targetSquare) {
-        List<Round> rounds = game.getRounds();
+    public boolean moveable(Game game, Piece piece, Square targetSquare) {
         Chess chess = game.getChess();
-        Square current = piece.getCurrent();
+        boolean firstStep = this.isFirstStep(game, piece);
         Piece targetPiece = chess.locatePiece(targetSquare.getFile(), targetSquare.getRank());
-        boolean firstStep = true;
-        for (Round round : rounds) {
-            if ((PieceColor.White.equals(piece.getColor()) && piece.equals(round.getWhitePiece()))
-                    || (PieceColor.Black.equals(piece.getColor()) && piece.equals(round.getBlackPiece()))) {
-                firstStep = false;
-            }
-        }
-
-        Square[] moveableSquares = this.getMoveableSquares(chess, piece, firstStep);
-        Square[] checkableSquares = this.getCheckableSquares(chess, piece);
-        if (this.inMoveableSquares(targetSquare, moveableSquares)) {
-            if (firstStep) {
-                if (Math.abs(targetSquare.getFile() - current.getFile()) == 1) {
-                    return targetPiece == null;
-                } else {
-                    return chess.locatePiece(moveableSquares[0]) == null
-                            && chess.locatePiece(moveableSquares[1]) == null;
-                }
-            } else {
-                return targetPiece == null;
-            }
-        } else if (this.inCheckableSquares(targetSquare, checkableSquares)) {
-            return targetPiece != null && !targetPiece.getColor().equals(piece.getColor());
-        } else {
+        //
+        if (chess.isLeapOver(piece.getCurrent(), targetSquare)) {
             return false;
+        } else {
+            Square[] moveableSquares = this.getMoveableSquares(chess, piece, firstStep);
+            Square[] checkableSquares = this.getCheckableSquares(chess, piece);
+            if (this.inMoveableSquares(targetSquare, moveableSquares)) {
+                if (firstStep) {
+                    return moveableSquares.length == 1 ? targetPiece == null
+                            : chess.locatePiece(moveableSquares[0]) == null
+                            && chess.locatePiece(moveableSquares[1]) == null;
+                } else {
+                    return targetPiece == null;
+                }
+            } else if (this.inCheckableSquares(targetSquare, checkableSquares)) {
+                return targetPiece != null && targetPiece.diffColor(piece);
+            } else {
+                return false;
+            }
         }
     }
 
@@ -99,5 +92,16 @@ public class PawnMoveRule implements PieceRule {
             default:
                 return null;
         }
+    }
+
+    private boolean isFirstStep(Game game, Piece piece) {
+        List<GameRound> rounds = game.getRounds();
+        for (GameRound round : rounds) {
+            if ((PieceColor.White.equals(piece.getColor()) && piece.equals(round.getWhitePiece()))
+                    || (PieceColor.Black.equals(piece.getColor()) && piece.equals(round.getBlackPiece()))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

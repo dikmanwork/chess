@@ -1,9 +1,7 @@
 package me.dikman.chess;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.junit.Before;
+import me.dikman.chess.game.GamePlayer;
+import me.dikman.chess.game.Game;
 import org.junit.Test;
 
 /**
@@ -12,17 +10,11 @@ import org.junit.Test;
  * @created Nov 20, 2013 8:27:42 PM
  */
 public class PlayTest {
-
-    @Before
-    public void init() {
-        Logger.getRootLogger().addAppender(new ConsoleAppender(new SimpleLayout()));
-    }
-
     @Test
     public void simulate() {
-        ChessGame game = new ChessGame();
-        Player white = game.getWhitePlayer();
-        Player black = game.getBlackPlayer();
+        Game game = new Game();
+        GamePlayer white = game.getWhitePlayer();
+        GamePlayer black = game.getBlackPlayer();
         //
         game.start();
         black.move('D', 4, 'D', 5);

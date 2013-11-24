@@ -57,6 +57,14 @@ public class Chess {
         this.pieces[index++] = new Piece(this, "Pawn", PieceColor.Black, new Square('H', 7));
     }
 
+    public ChessBoard getChessBoard() {
+        return chessBoard;
+    }
+
+    public Piece[] getPieces() {
+        return pieces;
+    }
+
     public Piece locatePiece(char file, int rank) {
         Square square = this.chessBoard.locateSquare(file, rank);
         for (Piece piece : this.pieces) {
@@ -76,11 +84,18 @@ public class Chess {
         return this.locatePiece(square.getFile(), square.getRank());
     }
 
-    public ChessBoard getChessBoard() {
-        return chessBoard;
-    }
+    public boolean isLeapOver(Square square, Square targetSquare) {
+        Piece piece = this.locatePiece(square);
+        int diff = 1;
+        while (diff++ < Math.max(Math.abs(square.getFile() - targetSquare.getFile()),
+                Math.abs(square.getRank() - targetSquare.getRank()))) {
+            Square nextSquare = piece.move(piece.getDirection(targetSquare), diff);
+            if (nextSquare != null && !nextSquare.equals(targetSquare)
+                    && this.locatePiece(nextSquare) != null) {
+                return true;
+            }
+        }
 
-    public Piece[] getPieces() {
-        return pieces;
+        return false;
     }
 }

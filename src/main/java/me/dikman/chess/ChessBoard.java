@@ -13,7 +13,7 @@ public class ChessBoard {
 
     private Square[][] squares;
 
-    public ChessBoard() {
+    ChessBoard() {
         this.squares = new Square[8][8];
         int minRank = 1;
         int maxRank = 8;

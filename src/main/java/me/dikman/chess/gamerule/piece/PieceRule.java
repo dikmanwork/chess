@@ -4,7 +4,7 @@
  */
 package me.dikman.chess.gamerule.piece;
 
-import me.dikman.chess.ChessGame;
+import me.dikman.chess.game.Game;
 import me.dikman.chess.Piece;
 import me.dikman.chess.Square;
 
@@ -15,5 +15,5 @@ import me.dikman.chess.Square;
  */
 public interface PieceRule {
 
-    boolean moveable(ChessGame game, Piece piece, Square targetSquare);
+    boolean moveable(Game game, Piece piece, Square targetSquare);
 }

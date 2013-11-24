@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import me.dikman.chess.Chess;
-import me.dikman.chess.ChessGame;
-import me.dikman.chess.ChessGameRule;
+import me.dikman.chess.game.Game;
+import me.dikman.chess.game.GameRule;
 import me.dikman.chess.Piece;
-import me.dikman.chess.Player;
+import me.dikman.chess.game.GamePlayer;
 import me.dikman.chess.gamerule.piece.BishopMoveRule;
 import me.dikman.chess.gamerule.piece.KingMoveRule;
 import me.dikman.chess.gamerule.piece.KnightMoveRule;
@@ -27,7 +27,7 @@ import me.dikman.chess.gamerule.piece.RookMoveRule;
  * @author HuangDiWen
  * @created Nov 22, 2013 11:01:23 PM
  */
-public class MovePieceRule implements ChessGameRule {
+public class MovePieceRule implements GameRule {
 
     private Map<String, PieceRule> rules = new HashMap();
 
@@ -40,11 +40,9 @@ public class MovePieceRule implements ChessGameRule {
         this.rules.put("Pawn", new PawnMoveRule());
     }
 
-    public boolean move(ChessGame game, Player player, char nowFile, int nowRank, char newFile, int newRank) {
+    public boolean move(Game game, GamePlayer player, Square square, Square targetSquare) {
         Chess chess = game.getChess();
-        Square square = chess.locateSquare(nowFile, nowRank);
-        Square targetSquare = chess.locateSquare(newFile, newRank);
-        Piece piece = chess.locatePiece(nowFile, nowRank);
+        Piece piece = chess.locatePiece(square);
         PieceRule pieceRule = this.rules.get(piece.getName());
         if (pieceRule.moveable(game, piece, targetSquare)) {
             List list = new ArrayList();
@@ -55,7 +53,7 @@ public class MovePieceRule implements ChessGameRule {
             list.add(square);
             list.add(targetSquare);
             //
-            Piece taretPiece = chess.locatePiece(newFile, newRank);
+            Piece taretPiece = chess.locatePiece(targetSquare);
             if (taretPiece != null) {
                 builder.append(" taking %s's %s");
                 list.add(taretPiece.getColor());

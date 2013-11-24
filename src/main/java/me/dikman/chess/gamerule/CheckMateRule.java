@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import me.dikman.chess.Chess;
-import me.dikman.chess.ChessGame;
-import me.dikman.chess.ChessGameRule;
+import me.dikman.chess.game.Game;
+import me.dikman.chess.game.GameRule;
 import me.dikman.chess.Piece;
 import me.dikman.chess.PieceColor;
-import me.dikman.chess.Player;
+import me.dikman.chess.game.GamePlayer;
 import me.dikman.chess.Square;
 import me.dikman.chess.gamerule.piece.BishopMoveRule;
 import me.dikman.chess.gamerule.piece.KingMoveRule;
@@ -28,7 +28,7 @@ import me.dikman.chess.gamerule.piece.RookMoveRule;
  * @author HuangDiWen
  * @created Nov 23, 2013 12:08:59 PM
  */
-public class CheckMateRule implements ChessGameRule {
+public class CheckMateRule implements GameRule {
 
     private Map<String, PieceRule> rules = new HashMap();
 
@@ -41,35 +41,14 @@ public class CheckMateRule implements ChessGameRule {
         this.rules.put("Pawn", new PawnMoveRule());
     }
 
-    public boolean move(ChessGame game, Player player, char nowFile, int nowRank, char newFile, int newRank) {
+    public boolean move(Game game, GamePlayer player, Square square, Square targetSquare) {
         Chess chess = game.getChess();
-        Piece piece = chess.locatePiece(newFile, newRank);
+        Piece piece = chess.locatePiece(targetSquare);
         Square kingSquare = this.findKingSquare(chess, piece.getOpponentColor());
         Piece kingPiece = chess.locatePiece(kingSquare);
-        PieceRule pieceRule = this.rules.get(piece.getName());
-        boolean checked = pieceRule.moveable(game, piece, kingSquare);
+        boolean checked = this.kingChecked(game, kingPiece);
         if (checked) {
-            boolean checkMate = true;
-            //
-            Piece[] opponenntPieces = this.getPieces(chess, piece.getOpponentColor());
-            for (Piece opponent : opponenntPieces) {
-                PieceRule moveRule = this.rules.get(opponent.getName());
-                if (moveRule.moveable(game, opponent, piece.getCurrent())) {
-                    checkMate = false;
-                    break;
-                }
-            }
-
-            //
-            PieceRule kingMoveRule = this.rules.get(kingPiece.getName());
-            Square[] squares = this.getMoveableArea(kingPiece);
-            for (Square square : squares) {
-                if (square != null && kingMoveRule.moveable(game, kingPiece, square)) {
-                    checkMate = false;
-                    break;
-                }
-            }
-
+            boolean checkMate = this.checkMate(game, kingPiece);
             if (checkMate) {
                 System.out.println(String.format("%s is in checkmate", piece.getOpponentColor()));
                 return false;
@@ -92,17 +71,52 @@ public class CheckMateRule implements ChessGameRule {
         return null;
     }
 
-    private Square[] getMoveableArea(Piece king) {
-        List<Square> squares = new ArrayList();
-        squares.add(king.moveFront(1));
-        squares.add(king.moveBack(1));
-        squares.add(king.moveLeft(1));
-        squares.add(king.moveLeftBack(1));
-        squares.add(king.moveLeftFront(1));
-        squares.add(king.moveRight(1));
-        squares.add(king.moveRightBack(1));
-        squares.add(king.moveRightFront(1));
-        return squares.toArray(new Square[squares.size()]);
+    private boolean checkMate(Game game, Piece kingPiece) {
+        Piece[] pieces = this.getPieces(game.getChess(), kingPiece.getColor());
+        Square[][] squares = game.getChess().getChessBoard().getSquares();
+        for (Square[] squareFile : squares) {
+            for (Square squareFileRank : squareFile) {
+                for (Piece piece : pieces) {
+                    PieceRule pieceRule = this.rules.get(piece.getName());
+                    if (pieceRule.moveable(game, piece, squareFileRank)) {
+                        if (!this.kingWillBeChecked(game, piece, squareFileRank, kingPiece)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private boolean kingChecked(Game game, Piece kingPiece) {
+        Piece[] pieces = this.getPieces(game.getChess(), kingPiece.getOpponentColor());
+        for (Piece piece : pieces) {
+            PieceRule pieceRule = this.rules.get(piece.getName());
+            if (pieceRule.moveable(game, piece, kingPiece.getCurrent())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean kingWillBeChecked(Game game, Piece movingPiece, Square targetSquare, Piece kingPiece) {
+        Square square = movingPiece.getCurrent();
+        Piece targetPiece = game.getChess().locatePiece(targetSquare);
+        try {
+            //detect
+            movingPiece.setCurrent(targetSquare);
+            if (targetPiece != null) {
+                targetPiece.setCurrent(null);
+            }
+            return this.kingChecked(game, kingPiece);
+        } finally {
+            movingPiece.setCurrent(square);
+            if (targetPiece != null) {
+                targetPiece.setCurrent(targetSquare);
+            }
+        }
     }
 
     private Piece[] getPieces(Chess chess, PieceColor color) {

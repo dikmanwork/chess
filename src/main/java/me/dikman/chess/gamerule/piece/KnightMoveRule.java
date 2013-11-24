@@ -4,11 +4,8 @@
  */
 package me.dikman.chess.gamerule.piece;
 
-import java.util.ArrayList;
-import java.util.List;
-import me.dikman.chess.Chess;
 import me.dikman.chess.Square;
-import me.dikman.chess.ChessGame;
+import me.dikman.chess.game.Game;
 import me.dikman.chess.Piece;
 
 /**
@@ -18,34 +15,17 @@ import me.dikman.chess.Piece;
  */
 public class KnightMoveRule implements PieceRule {
 
-    public boolean moveable(ChessGame game, Piece piece, Square targetSquare) {
-        Square[] moveableSquares = this.getMoveableArea(game.getChess(), piece.getCurrent());
-        return this.inArray(targetSquare, moveableSquares);
-    }
-
-    private Square[] getMoveableArea(Chess chess, Square current) {
-        List<Square> squares = new ArrayList();
-        squares.add(this.getMoveableSquare(chess, current, 1, 2));
-        squares.add(this.getMoveableSquare(chess, current, 1, -2));
-        squares.add(this.getMoveableSquare(chess, current, 2, 1));
-        squares.add(this.getMoveableSquare(chess, current, 2, -1));
-        squares.add(this.getMoveableSquare(chess, current, -1, 2));
-        squares.add(this.getMoveableSquare(chess, current, -1, -2));
-        squares.add(this.getMoveableSquare(chess, current, -2, 1));
-        squares.add(this.getMoveableSquare(chess, current, -2, -1));
-        return squares.toArray(new Square[squares.size()]);
-    }
-
-    private Square getMoveableSquare(Chess chess, Square current, int diffFile, int diffRank) {
-        return chess.locateSquare((char) (current.getFile() + diffFile), current.getRank() + diffRank);
-    }
-
-    private boolean inArray(Square square, Square[] squares) {
-        for (Square s : squares) {
-            if (square.equals(s)) {
-                return true;
-            }
+    public boolean moveable(Game game, Piece piece, Square targetSquare) {
+        Square currentSquare = piece.getCurrent();
+        Piece targetPiece = game.getChess().locatePiece(targetSquare);
+        //
+        if (targetPiece != null && targetPiece.sameColor(piece)) {
+            return false;
+        } else {
+            return (Math.abs(currentSquare.getFile() - targetSquare.getFile()) == 1
+                    && Math.abs(currentSquare.getRank() - targetSquare.getRank()) == 2)
+                    || (Math.abs(currentSquare.getFile() - targetSquare.getFile()) == 2
+                    && Math.abs(currentSquare.getRank() - targetSquare.getRank()) == 1);
         }
-        return false;
     }
 }

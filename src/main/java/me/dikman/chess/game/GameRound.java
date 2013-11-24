@@ -2,14 +2,18 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package me.dikman.chess;
+package me.dikman.chess.game;
+
+import me.dikman.chess.PieceColor;
+import me.dikman.chess.Square;
+import me.dikman.chess.Piece;
 
 /**
  *
  * @author HuangDiWen
  * @created Nov 22, 2013 10:44:28 PM
  */
-public class Round {
+public class GameRound {
 
     private Piece whitePiece;
     private Square whiteSquare;

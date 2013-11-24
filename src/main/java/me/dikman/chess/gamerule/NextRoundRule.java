@@ -5,34 +5,35 @@
 package me.dikman.chess.gamerule;
 
 import me.dikman.chess.Chess;
-import me.dikman.chess.ChessGame;
-import me.dikman.chess.ChessGameRule;
+import me.dikman.chess.game.Game;
+import me.dikman.chess.game.GameRule;
 import static me.dikman.chess.PieceColor.Black;
 import static me.dikman.chess.PieceColor.White;
-import me.dikman.chess.Player;
-import me.dikman.chess.Round;
+import me.dikman.chess.game.GamePlayer;
+import me.dikman.chess.game.GameRound;
+import me.dikman.chess.Square;
 
 /**
  *
  * @author HuangDiWen
  * @created Nov 22, 2013 11:13:21 PM
  */
-public class NextRoundRule implements ChessGameRule {
+public class NextRoundRule implements GameRule {
 
-    public boolean move(ChessGame game, Player player, char nowFile, int nowRank, char newFile, int newRank) {
+    public boolean move(Game game, GamePlayer player, Square square, Square targetSquare) {
         Chess chess = game.getChess();
-        Round round = game.getCurrentRound();
+        GameRound round = game.getCurrentRound();
         switch (player.getColor()) {
             case White:
-                round.setWhitePiece(chess.locatePiece(newFile, newRank));
-                round.setWhiteSquare(chess.locateSquare(nowFile, nowRank));
-                round.setWhiteMoveSquare(chess.locateSquare(newFile, newRank));
+                round.setWhitePiece(chess.locatePiece(targetSquare));
+                round.setWhiteSquare(square);
+                round.setWhiteMoveSquare(targetSquare);
                 break;
             case Black:
-                round.setBlackPiece(chess.locatePiece(newFile, newRank));
-                round.setBlackSquare(chess.locateSquare(nowFile, nowRank));
-                round.setBlackMoveSquare(chess.locateSquare(newFile, newRank));
-                game.getRounds().add(new Round());
+                round.setBlackPiece(chess.locatePiece(targetSquare));
+                round.setBlackSquare(square);
+                round.setBlackMoveSquare(targetSquare);
+                game.getRounds().add(new GameRound());
                 break;
             default:
         }

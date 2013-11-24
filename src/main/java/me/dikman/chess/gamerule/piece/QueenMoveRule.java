@@ -5,7 +5,7 @@
 package me.dikman.chess.gamerule.piece;
 
 import me.dikman.chess.Square;
-import me.dikman.chess.ChessGame;
+import me.dikman.chess.game.Game;
 import me.dikman.chess.Piece;
 
 /**
@@ -23,7 +23,7 @@ public class QueenMoveRule implements PieceRule {
         this.rookMoveRule = new RookMoveRule();
     }
 
-    public boolean moveable(ChessGame game, Piece piece, Square targetSquare) {
+    public boolean moveable(Game game, Piece piece, Square targetSquare) {
         return this.bishopMoveRule.moveable(game, piece, targetSquare)
                 || this.rookMoveRule.moveable(game, piece, targetSquare);
     }
