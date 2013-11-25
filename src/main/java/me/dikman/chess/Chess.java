@@ -4,6 +4,9 @@
  */
 package me.dikman.chess;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author HuangDiWen
@@ -74,6 +77,17 @@ public class Chess {
         }
 
         return null;
+    }
+
+    public Piece[] getAlivePieces(PieceColor color) {
+        List<Piece> pieces = new ArrayList();
+        Piece[] all = this.getPieces();
+        for (Piece piece : all) {
+            if (piece.getColor().equals(color) && piece.alive()) {
+                pieces.add(piece);
+            }
+        }
+        return pieces.toArray(new Piece[pieces.size()]);
     }
 
     public Square locateSquare(char file, int rank) {

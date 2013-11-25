@@ -26,24 +26,16 @@ public class PawnMoveRule implements PieceRule {
         boolean firstStep = this.isFirstStep(game, piece);
         Piece targetPiece = chess.locatePiece(targetSquare.getFile(), targetSquare.getRank());
         //
-        if (chess.isLeapOver(piece.getCurrent(), targetSquare)) {
-            return false;
+        Square[] moveableSquares = this.getMoveableSquares(chess, piece, firstStep);
+        Square[] checkableSquares = this.getCheckableSquares(chess, piece);
+        if (this.inMoveableSquares(targetSquare, moveableSquares)) {
+            return firstStep ? (moveableSquares.length == 1 ? targetPiece == null
+                    : chess.locatePiece(moveableSquares[0]) == null
+                    && chess.locatePiece(moveableSquares[1]) == null) : targetPiece == null;
+        } else if (this.inCheckableSquares(targetSquare, checkableSquares)) {
+            return targetPiece != null && targetPiece.diffColor(piece);
         } else {
-            Square[] moveableSquares = this.getMoveableSquares(chess, piece, firstStep);
-            Square[] checkableSquares = this.getCheckableSquares(chess, piece);
-            if (this.inMoveableSquares(targetSquare, moveableSquares)) {
-                if (firstStep) {
-                    return moveableSquares.length == 1 ? targetPiece == null
-                            : chess.locatePiece(moveableSquares[0]) == null
-                            && chess.locatePiece(moveableSquares[1]) == null;
-                } else {
-                    return targetPiece == null;
-                }
-            } else if (this.inCheckableSquares(targetSquare, checkableSquares)) {
-                return targetPiece != null && targetPiece.diffColor(piece);
-            } else {
-                return false;
-            }
+            return false;
         }
     }
 

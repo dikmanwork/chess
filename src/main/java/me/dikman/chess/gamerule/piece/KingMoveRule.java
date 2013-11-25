@@ -12,7 +12,6 @@ import me.dikman.chess.Chess;
 import me.dikman.chess.Square;
 import me.dikman.chess.game.Game;
 import me.dikman.chess.Piece;
-import me.dikman.chess.PieceColor;
 
 /**
  *
@@ -36,6 +35,7 @@ public class KingMoveRule implements PieceRule {
         Chess chess = game.getChess();
         Square square = piece.getCurrent();
         Piece targetPiece = chess.locatePiece(targetSquare);
+        //
         if (chess.isLeapOver(piece.getCurrent(), targetSquare)) {
             return false;
         } else if (targetPiece != null && targetPiece.getColor().equals(piece.getColor())) {
@@ -60,7 +60,7 @@ public class KingMoveRule implements PieceRule {
                 targetPiece.setCurrent(null);
             }
             //
-            Piece[] pieces = this.getPieces(game.getChess(), kingPiece.getOpponentColor());
+            Piece[] pieces = game.getChess().getAlivePieces(kingPiece.getDiffColor());
             for (Piece piece : pieces) {
                 PieceRule pieceRule = this.rules.get(piece.getName());
                 if (pieceRule.moveable(game, piece, kingPiece.getCurrent())) {
@@ -74,16 +74,5 @@ public class KingMoveRule implements PieceRule {
                 targetPiece.setCurrent(targetSquare);
             }
         }
-    }
-
-    private Piece[] getPieces(Chess chess, PieceColor color) {
-        List<Piece> pieces = new ArrayList();
-        Piece[] all = chess.getPieces();
-        for (Piece piece : all) {
-            if (piece.getColor().equals(color) && piece.alive()) {
-                pieces.add(piece);
-            }
-        }
-        return pieces.toArray(new Piece[pieces.size()]);
     }
 }

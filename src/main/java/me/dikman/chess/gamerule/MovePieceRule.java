@@ -5,9 +5,7 @@
 package me.dikman.chess.gamerule;
 
 import me.dikman.chess.Square;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import me.dikman.chess.Chess;
 import me.dikman.chess.game.Game;
@@ -45,24 +43,15 @@ public class MovePieceRule implements GameRule {
         Piece piece = chess.locatePiece(square);
         PieceRule pieceRule = this.rules.get(piece.getName());
         if (pieceRule.moveable(game, piece, targetSquare)) {
-            List list = new ArrayList();
             StringBuilder builder = new StringBuilder();
-            builder.append("%s’s %s moves from %s to %s");
-            list.add(player.getColor());
-            list.add(piece.getName());
-            list.add(square);
-            list.add(targetSquare);
-            //
+            builder.append(String.format("%s's %s moves from %s to %s", player.getColor(), piece.getName(), square, targetSquare));
             Piece taretPiece = chess.locatePiece(targetSquare);
+            piece.setCurrent(targetSquare);
             if (taretPiece != null) {
-                builder.append(" taking %s's %s");
-                list.add(taretPiece.getColor());
-                list.add(taretPiece.getName());
+                builder.append(String.format(" taking %s's %s", taretPiece.getColor(), taretPiece.getName()));
                 taretPiece.setCurrent(null);
             }
-            piece.setCurrent(targetSquare);
-
-            System.out.println(String.format(builder.toString(), list.toArray()));
+            System.out.println(builder.toString());
             return true;
         } else {
             System.out.println(String.format("%s’s %s cannot move to %s!", new Object[]{player.getColor(), piece.getName(), targetSquare}));

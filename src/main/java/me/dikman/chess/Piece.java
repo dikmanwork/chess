@@ -47,7 +47,7 @@ public class Piece {
         this.current = current;
     }
 
-    public PieceColor getOpponentColor() {
+    public PieceColor getDiffColor() {
         return this.color.equals(PieceColor.White) ? PieceColor.Black : PieceColor.White;
     }
 
